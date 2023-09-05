@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns#">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<title>RouteCheck</title>
+
+		<meta name="description" content="Check out cycling routes for road surface type, Google Streetview and Strava Heatmap popularity. Load routes from GPX or build a route, then export with features like pubs, gas stations and accommodation points from OSM.">
+		<meta name="keywords" content="Cycling,gpx,map,Strava,heatmap,streetview,route,planning,poi,paved,unpaved">
+		<meta name="author" content="Zach Bagnall <https://twitter.com/yemble>">
+
+		<meta property="og:site_name" content="RouteCheck" />
+		<meta property="og:title" content="RouteCheck" />
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="https://routecheck.cc/" />
+		<meta property="og:description" content="Check out cycling routes for road surface type, Google Streetview and Strava Heatmap popularity. Load routes from GPX or build a route, then export with features like pubs, gas stations and accommodation points from OSM." />
+
+		<meta property="og:image" content="https://routecheck.cc/og_preview.jpg" />
+		<meta property="og:image:type" content="image/jpeg" />
+		<meta property="og:image:width" content="600" />
+		<meta property="og:image:height" content="420" />
+
+		<link rel="shortcut icon" href="./favicon.128px.png"/>
+
+		<link rel="stylesheet" type="text/css" href="./include/Skeleton-2.0.4/css/skeleton.css"/>
+		<link rel="stylesheet" type="text/css" href="./include/styles.css"/>
+
+		<link rel="stylesheet" type="text/css" href="https://cdn.materialdesignicons.com/1.3.41/css/materialdesignicons.min.css" />
+
+		<script type="text/javascript" src="./include/zepto.min.js"></script>
+		<script type="text/javascript" src="./include/zepto_fx.js"></script>
+		<script type="text/javascript" src="./include/zepto_fx_methods.js"></script>
+		<!-- <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script> -->
+
+		<script type="text/javascript" src="./include/leaflet-1.1.0/leaflet.js"></script>
+		<link rel="stylesheet" type="text/css" href="./include/leaflet-1.1.0/leaflet.css"/>
+
+		<!-- https://github.com/leaflet-extras/leaflet-providers -->
+		<script type="text/javascript" src="./include/leaflet-providers/leaflet-providers.js"></script>
+
+		<!-- https://gitlab.com/IvanSanchez/Leaflet.GridLayer.GoogleMutant -->
+		<script type="text/javascript" src="./include/leaflet.googlemutant/Leaflet.GoogleMutant.js"></script>
+
+		<!-- https://github.com/makinacorpus/Leaflet.GeometryUtil -->
+		<script type="text/javascript" src="./include/Leaflet.GeometryUtil/src/leaflet.geometryutil.js"></script>
+
+		<!-- https://github.com/mpetazzoni/leaflet-gpx -->
+		<script type="text/javascript" src="./include/leaflet-gpx/gpx.js"></script>
+
+		<!-- https://github.com/adoroszlai/leaflet-distance-markers -->
+		<script type="text/javascript" src="./include/leaflet-distance-markers/leaflet-distance-marker.js"></script>
+
+		<!-- https://github.com/Leaflet/Leaflet.Icon.Glyph -->
+		<script type="text/javascript" src="./include/Leaflet.Icon.Glyph/Leaflet.Icon.Glyph.js"></script>
+
+		<!-- https://esri.github.io/esri-leaflet/ -->
+		<script type="text/javascript" src="./include/esri-leaflet-v2.4.1/esri-leaflet.js"></script>
+
+		<!-- https://github.com/camsong/fetch-jsonp -->
+		<script type="text/javascript" src="./include/fetch-jsonp.js"></script>
+
+		<script type="text/javascript" src="./app_strava.js"></script>
+		<script type="text/javascript" src="./app.js"></script>
+		<script type="text/javascript" src="./app_rwgps.js"></script>
+		<script type="text/javascript" src="./app_ors.js"></script>
+		<script type="text/javascript" src="./app_poi.js"></script>
+		<script type="text/javascript" src="./app_ways.js"></script>
+	</head>
+	<body>
+		<header id="settings">
+			<nav id="switcher">
+				<ul>
+					<li class="active"><a href="javascript:void(0)"    data-target="route">Route</a></li>
+					<li               ><a href="javascript:void(0)"  data-target="builder">Builder</a></li>
+					<li               ><a href="javascript:void(0)" data-target="features">Points</a></li>
+					<li               ><a href="javascript:void(0)"      data-target="map">Map</a></li>
+					<li               ><a href="javascript:void(0)"      data-target="help">?</a></li>
+				</ul>
+			</nav>
+
+			<a href="javascript:void(0);" class="expanded" id="settings_toggle">&#9650;</a><!-- up arrow -->
+
+			<div id="switched">
+				<!-- ROUTE -->
+				<div class="switched-content" id="route">
+					<div class="section-group">
+						<div class="section" id="gpx">
+							<h2>GPX</h2>
+							<input type="checkbox" name="enabled" title="Visible" disabled="disabled"/>
+							<select name="color">
+								<option>yellow</option>
+								<option>red</option>
+								<option>springgreen</option>
+								<option>hotpink</option>
+							</select>
+						</div>
+					</div>
+					<div class="section-group">
+						<div class="section" id="upload">
+							<h2>File</h2>
+							<input id="gpx_file" type="file"/>
+							<label id="gpx_file_label" for="gpx_file">Upload GPX</label>
+						</div>
+					</div>
+ 					<!-- <div class="section-group">
+						<div class="section" id="rwgps">
+							<h2>RideWithGPS</h2>
+							<div class="toggle" id="login">
+								<form onsubmit="return false;">
+									<input type="text" name="rwgps_username" placeholder="Username/email" />
+									<input type="password" name="rwgps_password" placeholder="Password" />
+									<button id="rwgps_login">Login</button>
+								</form>
+							</div>
+							<div class="toggle" id="routes" style="display: none">
+								<select name="rwgps_route"></select>
+								<a id="rwgps_logout" href="javascript:void(0)" title="Logout of ridewithgps.com">Logout</a>
+							</div>
+						</div>
+					</div> -->
+ 					<div class="section-group">
+						<a href="javascript:void(0)" id="geolocate" title="Show my location" style="text-decoration: none">📌 Where am I?</a>
+					</div>
+				</div>
+
+				<!-- BUILDER -->
+				<div class="switched-content" id="builder" style="display: none">
+					<div class="section-group">
+						<div class="section" id="ors">
+							<h2>OpenRouteService</h2>
+						</div>
+					</div>
+					<div class="section-group">
+						<div class="section">
+							Avoid
+							<input type="checkbox" id="ors_avoid_pavedroads" name="ors_avoid_pavedroads" /><label for="ors_avoid_pavedroads">paved</label>
+							<input type="checkbox" id="ors_avoid_unpavedroads" name="ors_avoid_unpavedroads" /><label for="ors_avoid_unpavedroads">unpaved</label>
+							<input type="checkbox" id="ors_avoid_hills" name="ors_avoid_hills" /><label for="ors_avoid_hills">hills</label>
+						</div>
+						<div class="section">
+							<select name="ors_difficulty">
+								<option value="0">Novice</option>
+								<option value="1">Moderate</option>
+								<option value="2" selected="selected">Amateur</option>
+								<option value="3">Pro</option>
+							</select>
+							on
+							<select name="ors_method">
+								<option value="cycling-regular">regular bike</option>
+								<option value="cycling-road">road bike</option>
+								<option value="cycling-safe">safe bike</option>
+								<option value="cycling-mountain">mountain bike</option>
+								<option value="cycling-tour">touring bike</option>
+								<option value="cycling-electric">electric bike</option>
+							</select>
+						</div>
+					</div>
+					<div class="section-group top-space">
+						<div class="section">
+							<button id="ors_waypoints">New route</button>
+							(<span id="ors_waypoint_count">0</span>)
+							then
+							<span>
+								<button id="ors_route">Calculate</button>
+								<img class="spinner" src="./img/spinner2.gif"/>
+							</span>
+						</div>
+					</div>
+					<div class="section-group">
+						<div class="section" id="export">
+							<h2>Export GPX</h2>
+							<a class="export_link route" href="javascript:void(0)" data-content="route" title="Export GPX route">Route only</a> or
+							<a class="export_link features" href="javascript:void(0)" data-content="features" title="Export GPX features only">POIs only</a> or
+							<a class="export_link all" href="javascript:void(0)" data-content="all" title="Export GPX route with features">Route + POIs</a>
+						</div>
+					</div>
+				</div>
+
+				<!-- FEATURES -->
+				<div class="switched-content" id="features" style="display: none">
+					<div class="section" id="poi">
+						<div>
+							<h2>Food &amp; drink</h2>
+
+							<span>
+								<input type="checkbox" id="poi_pub" name="poi_pub"
+									data-featurename="pub"
+									data-featuregroup="amenity"
+									data-featuretypes="pub" />
+								<label for="poi_pub">pub</label>
+								<img class="spinner" src="./img/spinner2.gif"/>
+							</span>
+
+							<span>
+								<input type="checkbox" id="poi_cafe" name="poi_cafe"
+									data-featurename="cafe"
+									data-featuregroup="amenity"
+									data-featuretypes="cafe" />
+								<label for="poi_cafe">cafe</label>
+								<img class="spinner" src="./img/spinner2.gif"/>
+							</span>
+
+							<span>
+								<input type="checkbox" id="poi_fast_food" name="poi_fast_food"
+									data-featurename="fast_food"
+									data-featuregroup="amenity"
+									data-featuretypes="fast_food" />
+								<label for="poi_fast_food">fast food</label>
+								<img class="spinner" src="./img/spinner2.gif"/>
+							</span>
+
+							<span>
+								<input type="checkbox" id="poi_restaurant" name="poi_restaurant"
+									data-featurename="restaurant"
+									data-featuregroup="amenity"
+									data-featuretypes="restaurant" />
+								<label for="poi_restaurant">restaurant</label>
+								<img class="spinner" src="./img/spinner2.gif"/>
+							</span>
+						</div>
+
+						<div>
+							<h2>Retail</h2>
+
+							<span>
+								<input type="checkbox" id="poi_fuel" name="poi_fuel"
+									data-featurename="fuel"
+									data-featuregroup="amenity"
+									data-featuretypes="fuel" />
+								<label for="poi_fuel">gas station</label>
+								<img class="spinner" src="./img/spinner2.gif"/>
+							</span>
+
+							<span>
+								<input type="checkbox" id="poi_supermarket" name="poi_supermarket"
+									data-featurename="supermarket"
+									data-featuregroup="shop"
+									data-featuretypes="supermarket" />
+								<label for="poi_supermarket">supermarket</label>
+								<img class="spinner" src="./img/spinner2.gif"/>
+							</span>
+						</div>
+
+						<div>
+							<h2>Special</h2>
+
+							<span>
+								<input type="checkbox" id="poi_bikeshop" name="poi_bikeshop"
+									data-featurename="bikeshop"
+									data-featuregroup="shop"
+									data-featuretypes="bicycle" />
+								<label for="poi_bikeshop">bike shop</label>
+								<img class="spinner" src="./img/spinner2.gif"/>
+							</span>
+
+							<span>
+								<input type="checkbox" id="poi_pharmacy" name="poi_pharmacy"
+									data-featurename="pharmacy"
+									data-featuregroup="amenity"
+									data-featuretypes="pharmacy" />
+								<label for="poi_pharmacy">pharmacy</label>
+								<img class="spinner" src="./img/spinner2.gif"/>
+							</span>
+						</div>
+
+						<div>
+							<span>
+								<input type="checkbox" id="poi_accommodation" name="poi_accommodation"
+									data-featurename="accommodation"
+									data-featuregroup="tourism"
+									data-featuretypes="hostel,motel,hotel" />
+								<label for="poi_accommodation">accommodation</label>
+								<img class="spinner" src="./img/spinner2.gif"/>
+							</span>
+
+							<span>
+								<input type="checkbox" id="poi_camp_site" name="poi_camp_site"
+									data-featurename="camp_site"
+									data-featuregroup="tourism"
+									data-featuretypes="camp_site" />
+								<label for="poi_camp_site">camp site</label>
+								<img class="spinner" src="./img/spinner2.gif"/>
+							</span>
+						</div>
+
+					</div>
+					<div class="section" id="poi_range">
+						Distance from route
+						<select name="poi_range_miles">
+							<option value="0.25">1/4 mile</option>
+							<option value="1">1 mile</option>
+							<option value="5">5 mile</option>
+						</select>
+					</div>
+				</div>
+
+				<!-- MAP -->
+				<div class="switched-content" id="map" style="display: none">
+					<div class="section" id="osm">
+						<h2>Base map</h2>
+						<select name="tiles">
+							<option value="OpenStreetMap.Mapnik">OSM Default</option>
+							<option value="OpenStreetMap.BlackAndWhite">OSM B&amp;W</option>
+							<option value="Thunderforest.OpenCycleMap">OpenCycleMap</option>
+							<option value="OpenTopoMap">OpenTopo</option>
+							<option value="Google.roadmap">Goog Road</option>
+							<option value="Google.terrain">Goog Terrain</option>
+							<option value="Google.satellite">Goog Satelite</option>
+							<option value="Google.hybrid">Goog Hybrid</option>
+							<option value="ESRI.Streets">ESRI Streets</option>
+							<option value="ESRI.Topographic">ESRI Topographic</option>
+							<option value="ESRI.USATopo">ESRI USATopo</option>
+							<option value="ESRI.ShadedRelief">ESRI ShadedRelief</option>
+							<option value="ESRI.Imagery">ESRI Imagery</option>
+							<option value="ESRI.ImageryClarity">ESRI ImageryClarity</option>
+							<option value="ESRI.ImageryFirefly">ESRI ImageryFirefly</option>
+						</select>
+					</div>
+					<div class="section" id="unpaved">
+						<h2>Unpaved</h2>
+						<input type="checkbox" id="unpaved_enabled" title="Visible"/>
+						<a href="javascript:void(0);" id="unpaved_refresh">Refresh</a>
+						<img class="spinner" src="./img/spinner2.gif"/>
+					</div>
+					<!-- <div class="section" id="strava">
+						<h2>Strava heatmap</h2>
+						<input type="checkbox" name="enabled" title="Visible" checked="checked"/>
+						<select name="color">
+							<option value="v2.bluered">blue/red</option>
+							<option value="v2.hot">hot</option>
+						</select>
+						<select name="activity">
+							<option>cycling</option>
+							<option>running</option>
+							<option>both</option>
+						</select>
+						<input type="checkbox" name="top" id="heatmap_top" checked="checked" /><label for="heatmap_top">On top</label>
+						<span style="display:block;">No heatmap? <a href="https://www.strava.com/login" target="_blank">Log into Strava</a>, <em>then</em> <a href="javascript:location.reload()">reload this page</a>.</span>
+					</div> -->
+					<div class="section" id="distmarkers">
+						<h2>Distance markers</h2>
+						<select name="distance_unit_m">
+							<option value="1609.344">miles</option>
+							<option value="1000">km</option>
+						</select>
+					</div>
+				</div>
+
+				<!-- HELP -->
+				<div class="switched-content" id="help" style="display: none">
+					<div>
+						<strong>Help?!</strong><br/>
+						Click on a road to see Google <b>Streetview</b> imagery if available.<br/>
+						Press <b>g</b> key to toggle GPX route on/off.<br/>
+						<b>Points of interest</b> only shown along a route.<br/>
+						SSL everywhere, no cookies, nothing stored (except in your own browser).<br/>
+						Contact: <a href="https://twitter.com/yemble" target="_blank">@yemble</a>
+					</div>
+				</div>
+			</div>
+		</header>
+
+		<div id="mapobj"></div>
+
+		<div id="route-info" style="display: none">
+			<span class="field name"><span class="value"></span></span>
+			<span class="field distance">Distance: <span class="value"></span></span>
+			<span class="field ascent">Ascent: <span class="value"></span></span>
+		</div>
+
+		<script type="text/javascript">app_init();</script>
+	</body>
+</html>
